@@ -1,0 +1,12 @@
+[2015-10-10 10:24:19.296] [WARN] normal - GET /api/user/unameCheck?name=xiaomi
+[2015-10-10 10:24:19.445] [WARN] normal - GET /api/user/unameCheck?name=xiaomin
+[2015-10-10 10:24:19.548] [WARN] normal - GET /api/user/unameCheck?name=xiaoming
+[2015-10-10 10:26:43.863] [WARN] normal - GET /
+[2015-10-10 10:26:47.006] [WARN] normal - GET /api/user/unameCheck?name=x
+[2015-10-10 10:26:47.146] [WARN] normal - GET /api/user/unameCheck?name=xi
+[2015-10-10 10:26:47.293] [WARN] normal - GET /api/user/unameCheck?name=xia
+[2015-10-10 10:26:47.395] [WARN] normal - GET /api/user/unameCheck?name=xiao
+[2015-10-10 10:26:48.076] [WARN] normal - GET /api/user/unameCheck?name=xiaom
+[2015-10-10 10:26:48.227] [WARN] normal - GET /api/user/unameCheck?name=xiaomi
+[2015-10-10 10:26:48.392] [WARN] normal - GET /api/user/unameCheck?name=xiaomin
+[2015-10-10 10:26:48.501] [WARN] normal - GET /api/user/unameCheck?name=xiaoming

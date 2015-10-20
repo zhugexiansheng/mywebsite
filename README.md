@@ -1,2 +1,4 @@
 # 基于node和mysql实现的个人项目管理网站
 使用angular的前端
+使用mysql作为后台数据库，通过node-mysql来连接mysql数据库
+通过log4js来记录日志文件

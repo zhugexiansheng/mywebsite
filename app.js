@@ -5,6 +5,9 @@ var session=require("express-session");
 var http=require("http");
 var path = require('path');
 var conf = require("./config/config");
+var tool = require("./lib/tools");
+var log4js = require("./lib/logConfig");
+var myApp = {};
 
 var partials = require("express-partials");
 
@@ -21,6 +24,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(multer());
 
+app.use(log4js.log4js.connectLogger(log4js.logger("normal"), {level: 'auto', format:':method :url'}));
+
 //设置session,session可以在req和res中都能使用
 app.use(session({
 	secret:'secret',
@@ -33,20 +38,32 @@ app.use(session({
 
 //添加一个中间件用来处理session 对于每一次请求都进行相应的处理
 app.use(function(req,res,next){
-	res.locals.user = req.session.user;//res.locals保存在一次请求范围内的本地变量值
-	var err = req.session.error;
-	res.locals.message = '';
-	if (err) res.locals.message = '<div style="margin-bottom: 20px;color:red;">' + err + '</div>';
-	next();
+	var path = req.path;
+	if(path=="/"){
+		res.render("./static/dist/index",{title:conf.webDetail.title});
+	}else{
+		next();
+	}
 });
 
-app.get("*",function(req,res){
-	/*if(req.session.user){
-		res.render("./static/src/index");
-	}else{
-		res.render("./view/login");
-	}*/
-	res.render("./static/src/index");
+var api = ["user"];
+var each = tool.each;
+var extend = tool.extend;
+myApp.api={};
+
+each(api,function(x){
+	myApp.api[x]={};
+	extend(myApp.api[x],require("./api/"+x));
+});
+
+app.all("*",function(req,res){
+	var path = req.path;
+	var method = req.method;
+
+	path = path.split("/");
+	if (myApp.api[path[2]]) {
+		myApp.api[path[2]][method](req,res);		
+	}
 });
 
 app.listen(conf.listenPort,conf.server);

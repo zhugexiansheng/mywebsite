@@ -1,0 +1,27 @@
+{
+  "name": "mywebsite",
+  "version": "1.0",
+  "homepage": "https://github.com/zhugexiansheng/mywebsite",
+  "authors": [
+    "zhugekongming <zxmwebroad@163.com>"
+  ],
+  "description": "个人尝试的前端架构",
+  "main": "index.html",
+  "keywords": [
+    "angular",
+    "node",
+    "react"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "static/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular-cookies": "~1.4.4"
+  }
+}

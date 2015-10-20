@@ -1,0 +1,85 @@
+*{
+	padding: 0;
+	margin: 0;
+}
+
+body{
+	background: url("../img/bg.png") repeat-x #328eb4;
+	height: 100%;
+	width: 100%;
+	font: 12px/1 "Hiragino Sans GB","Microsoft YaHei","WenQuanYi Micro Hei",sans-serif;
+	-webkit-backface-visibility:hidden;
+	-moz-backface-visibility:hidden;
+	-o-backface-visibility:hidden;
+	backface-visibility:hidden;
+}
+
+.main{
+    position:absolute;
+    width:100%;
+    height:100%;
+	display:-moz-box;
+	display:-webkit-box;
+	display:box;
+	-moz-box-align:center;
+	-webkit-box-align:center;
+	-o-box-align:center;
+	box-align:center;
+}
+
+.layout-login{
+	width: 100%;
+
+	.book-top{
+	  margin-bottom:10px;
+	}
+}
+
+.layout-login .book-container{
+	width: 600px;
+	margin: 0 auto;
+}
+
+.layout-login .book-container img{
+	margin: 0 auto;
+	display: block; 
+}
+
+.layout-login .book-container .book-logo-name{
+	margin: 20px auto 0;
+	color: #fff;
+	font-size: 26px;
+	text-align: center;
+}
+
+.layout-login .book-container .book-logo-littlename{
+	color: #fff;
+	font-size: 16px;
+	margin-top: 10px;
+	text-align: center;
+}
+
+.layout-login{
+	-webkit-animation: enterFromTop 1s linear;
+	-moz-animation: enterFromTop 1s linear;
+	-o-animation: enterFromTop 1s linear;
+	animation: enterFromTop 1s linear;
+}
+
+@-webkit-keyframes enterFromTop{
+	0%{
+	  transform:translate3d(0,-100%,0);
+	}
+	25%{
+	  transform:translate3d(0,-50%,0);
+	}
+	50%{
+	  transform:translate3d(0,0,0);
+	}
+	75%{
+	  transform:translate3d(0,-25%,0);
+	}
+	100%{
+	  transform:translate3d(0,0,0)
+	}
+}
