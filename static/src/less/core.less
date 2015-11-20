@@ -3,10 +3,15 @@
 	margin: 0;
 }
 
-body{
-	background: url("../img/bg.png") repeat-x #328eb4;
+html,body{
 	height: 100%;
 	width: 100%;
+}
+
+body{
+	background: url("../img/galaxy.jpg");
+	background-position:center top;
+	background-size:100% 100%;
 	font: 12px/1 "Hiragino Sans GB","Microsoft YaHei","WenQuanYi Micro Hei",sans-serif;
 	-webkit-backface-visibility:hidden;
 	-moz-backface-visibility:hidden;
@@ -81,5 +86,19 @@ body{
 	}
 	100%{
 	  transform:translate3d(0,0,0)
+	}
+}
+
+.book-imgCon{
+	min-width:600px;
+	min-height:200px;
+	position:relative;
+
+	.bk-uploader{
+	  position:absolute;
+	  bottom:5px;
+	  left:5px;
+	  border-radius:50%;
+	  box-shadow: 0px 5px 2px #ccc;
 	}
 }

@@ -15,15 +15,24 @@ var ngTemplate = require('gulp-ng-template');//将angularjs里面使用的templa
 var server = require("gulp-develop-server");
 var path = require("path");
 var jshint = require("gulp-jshint");
+/*var cssSprite = require("gulp-css-spritesmith");*/
 
 gulp.task("clean",function(){
 	return gulp.src(["static/dist/*"])
 	       .pipe(clean({force:true}));
 });
 
+/*gulp.task("imgSprite",function(){
+	return gulp.src("static/src/less/icon.less")
+		   .pipe(less())
+		   .pipe(cssSprite({
+
+		   }))
+});*/
+
 gulp.task("css",function(){
 	return merge2(
-			   gulp.src(["static/src/less/*"])
+			   gulp.src(["static/src/less/*.less"])
 		       .pipe(less()),
 		       gulp.src("static/bower_components/bootstrap/dist/css/bootstrap.css")
 	       )
@@ -67,9 +76,15 @@ gulp.task("js-app",function(){
 
 //将静态文件和首页的index.html放在dist目录下
 gulp.task('files', function () {
-  return gulp.src(['static/src/{md,img}/*',
+  return gulp.src(['static/src/{md,img}/*.*',
                   'static/src/*.*'])
     .pipe(gulp.dest('static/dist'));
+});
+
+//静态图片文件
+gulp.task("macimg",function(){
+	return gulp.src(["static/src/img/mac/*"])
+	.pipe(gulp.dest("static/dist/img/mac"));
 });
 
 //web文字的处理
@@ -99,4 +114,4 @@ gulp.task("watch",function(){
 	});
 });
 
-gulp.task("default",gulpSequence('clean', 'jshint', ['css', 'js-lib', 'js-app', 'files','fonts','watch']));
+gulp.task("default",gulpSequence('clean', 'jshint', ['css', 'js-lib', 'js-app', 'files','fonts','macimg','watch']));

@@ -1,5 +1,4 @@
 var userDao = require("../dao/userDao");
-var logger = require("../lib/logConfig").logger("normal");
 
 function checkUname(req,res){
 	var name = req.param("name");
@@ -13,6 +12,17 @@ function checkUname(req,res){
 	});
 }
 
+function userLogin(req,res){
+	userDao.checkUser(req.body.username,req.body.password,function(data){
+		if (data.length&&data!=null) {
+			req.session.user = data[0];
+			res.json({msg:"登录成功",resultCode:"0000",list:data});
+		}else{
+			res.json({msg:"密码错误",resultCode:"1000"});
+		}
+	})
+}
+
 
 module.exports = {
 	GET:function(req,res){
@@ -24,6 +34,11 @@ module.exports = {
 		}
 	},
 	POST:function(req,res){
-
+		var path = req.path;
+		path = path.split("/");
+		switch(path[3]){
+			case "userLogin":userLogin(req,res)
+			break;
+		}
 	}
 }

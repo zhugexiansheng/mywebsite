@@ -11,10 +11,10 @@
 		</div>
 		<div class="book-form">
 			<form ng-if="!global.isLogin" ng-submit="subForm(useForm.$valid)" name="useForm" novalidate>
-				<div class="form-group has-feedback" ng-class="{true:'has-success',false:'has-error'}[!useForm.name.$error.validename]">
-					<input class="form-control" placeholder="用户名" type="text" required ng-model="user.name" name="name" validename/>
-					<span class="glyphicon glyphicon-ok form-control-feedback" ng-if="useForm.name.$dirty&&!useForm.name.$error.validename"></span>
-					<span class="glyphicon glyphicon-remove form-control-feedback" ng-if="useForm.name.$dirty&&useForm.name.$error.validename"></span>
+				<div class="form-group has-feedback" ng-class="{true:'has-success',false:'has-error'}[useForm.username.$valid]">
+					<input class="form-control" placeholder="用户名" type="text" required ng-model="user.username" name="username" validename/>
+					<span class="glyphicon glyphicon-ok form-control-feedback" ng-if="useForm.username.$dirty&&useForm.username.$valid"></span>
+					<span class="glyphicon glyphicon-remove form-control-feedback" ng-if="useForm.username.$dirty&&useForm.username.$invalid"></span>
 				</div>
 				<div class="form-group has-feedback" ng-class="{true:'has-success',false:'has-error'}[useForm.password.$dirty&&useForm.password.$valid]">
 					<input class="form-control" placeholder="密码" type="password" required ng-model="user.password" name="password">

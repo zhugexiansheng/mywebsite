@@ -3,7 +3,8 @@
 */
 myApp
 .constant('app',{
-	version : new Date().getTime()
+	version : new Date().getTime(),
+	canvasName : "winCanvas"
 })
 .config(['$stateProvider', '$urlRouterProvider','$locationProvider',
 	function($stateProvider, $urlRouterProvider,$locationProvider){

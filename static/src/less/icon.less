@@ -1,0 +1,67 @@
+.book-manu{
+	background: url("../img/mac/dock.png") no-repeat bottom;
+	width:auto;
+	bottom:0;
+	text-align:center;
+	position:fixed;
+	padding:5px 20px;
+	left: 50%;
+	cursor: pointer;
+  	margin-left: -265px;
+
+  	img{
+  		margin: 2px -2px;
+  		vertical-align: initial;
+  	}
+}
+
+#winCanvas{
+	position:absolute;z-index:-1;
+}
+
+.macWindow{position: absolute;
+  top: 5%;
+  left: 1%;
+  min-width:300px;
+  border:1px solid #888;background:#FFF;box-shadow:0 0 2em rgba(0, 0, 0, .3);}
+.macWindow>.t{margin:0;padding:.5em;border-bottom:1px solid #888;background:#CCC;padding-left: 10px;overflow: hidden;cursor:move;   
+	.h-icon{
+	  	border-radius: 50%;
+	  	width: 18px;
+	  	height: 18px;
+	  	float: left;
+	  	margin-right: 15px;
+	  	text-align: center;
+	  	cursor: pointer;
+
+	  	&:hover{
+	  		.h-opIcon{
+	  			display:inline-block;
+	  		}
+	  	}
+
+	  	.h-opIcon{
+	  		font-size: 12px;
+  			color: #f8f8f8;
+  			top: 0;
+  			display: none;
+	  	}
+    }
+
+    .h-title{
+	  	text-align: center;font-weight: bold;
+	}
+
+    .icon-r{
+      background-color: #E95050;
+    }
+
+    .icon-y{
+      background-color: #F1E37B;
+    }
+
+    .icon-b{
+      background-color: #52E95D;
+    }
+}
+.macWindow>.c{padding:.3em;max-height:100%;max-width:100%;overflow:visible}

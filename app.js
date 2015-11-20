@@ -20,7 +20,6 @@ app.set("view engine","html");//设置使用的模板引擎，设置模板渲染
 app.engine(".html",require("ejs").__express);//使用ejs的扩展函数来扩展渲染html后缀的页面的模板引擎
 app.use(express.static(path.join(__dirname, conf.staticFolder)));//通过use中间件来指定一个静态资源路径
 
-app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(multer());
 
@@ -36,7 +35,6 @@ app.use(session({
 	}
 }));
 
-//添加一个中间件用来处理session 对于每一次请求都进行相应的处理
 app.use(function(req,res,next){
 	var path = req.path;
 	if(path=="/"){
@@ -46,7 +44,19 @@ app.use(function(req,res,next){
 	}
 });
 
-var api = ["user"];
+//添加一个中间件用来处理session 对于每一次请求都进行相应的处理
+/*app.use(function(req,res,next){
+	var path = req.path;
+	path = path.split("/");
+
+	if (req.session.user||path[3]=="userLogin") {
+		next();
+	}else{
+		res.json({msg:"还未登录",resultCode:"1001"});
+	}
+});*/
+
+var api = ["user","files"];
 var each = tool.each;
 var extend = tool.extend;
 myApp.api={};

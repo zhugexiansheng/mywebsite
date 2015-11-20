@@ -1,16 +1,21 @@
 /*
 * 登录的congtroller
 */
-myApp.controller('loginCtrl',['app','$scope','restAPI',function(app,$scope,restAPI){
+myApp.controller('loginCtrl',['app','$scope','restAPI','$location',function(app,$scope,restAPI,$location){
 	$scope.user = {
-		name : "",
+		username : "",
 		password : ""
 	}
 
 	$scope.subForm = function(isValid){
-		console.log(1111,isValid);
 		if (isValid) {
-			console.log($scope.user);
+			restAPI.userLogin.post($scope.user,function(res){
+				if (res.resultCode=="0000") {
+					$location.path("/home");
+				}else{
+					
+				}
+			});
 		}
 
 		return false;

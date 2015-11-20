@@ -12,5 +12,12 @@ module.exports = {
 	sessionExpire : 1000*60*10,//设置session存活时间
 	webDetail : {
 		title : "诸葛茅庐",
+	},
+	dataBase:{
+		host:"localhost",
+		user:"root",
+		password:"",
+		database:"test",
+		port:"3306"
 	}
 };
