@@ -7,6 +7,7 @@ var path = require('path');
 var conf = require("./config/config");
 var tool = require("./lib/tools");
 var log4js = require("./lib/logConfig");
+var httpHandle = require("./lib/httpHandle");
 var myApp = {};
 
 var partials = require("express-partials");
@@ -20,7 +21,7 @@ app.set("view engine","html");//设置使用的模板引擎，设置模板渲染
 app.engine(".html",require("ejs").__express);//使用ejs的扩展函数来扩展渲染html后缀的页面的模板引擎
 app.use(express.static(path.join(__dirname, conf.staticFolder)));//通过use中间件来指定一个静态资源路径
 
-app.use(bodyParser.urlencoded({extended:true}));
+app.use(bodyParser.urlencoded({extended:true}));//将文件名进行反序列化，不然如果有中文的地址就不能读取出来
 app.use(multer());
 
 app.use(log4js.log4js.connectLogger(log4js.logger("normal"), {level: 'auto', format:':method :url'}));
@@ -72,7 +73,13 @@ app.all("*",function(req,res){
 
 	path = path.split("/");
 	if (myApp.api[path[2]]) {
-		myApp.api[path[2]][method](req,res);		
+		if (method=="POST") {
+			httpHandle.postHandle(req,res,function(req,res){
+				myApp.api[path[2]][method](req,res);
+			})
+		}else{
+			myApp.api[path[2]][method](req,res);
+		}		
 	}
 });
 

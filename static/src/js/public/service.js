@@ -12,7 +12,11 @@ myApp.factory("restAPI",["$resource",function($resource){
 	return {
 		unameCheck : $resource("/api/user/unameCheck",{},actions),
 		userLogin : $resource("/api/user/userLogin",{},actions),
-		uploadImg : $resource("/api/files/uploadImg",{},actions)
+		uploadImg : $resource("/api/files/uploadImg",{},actions),
+		getQiniuToken : $resource("/api/files/getQiniuToken",{},actions),
+		getQiuniuFiles : $resource("/api/files/getQiuniuFiles",{},actions),
+		getImageUrl : $resource("/api/files/getImageUrl",{},actions),
+		deleteQiniuFiles : $resource("/api/files/deleteQiniuFiles",{},actions)
 	}
 }])
 .factory("cache",["$cacheFactory",function($cacheFactory){

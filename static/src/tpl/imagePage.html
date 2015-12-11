@@ -3,18 +3,21 @@
 		<button type="button" class="btn btn-default"><span class="glyphicon glyphicon-th-list"></span></button>
 		<button type="button" class="btn btn-default"><span class="glyphicon glyphicon-th"></span></button>
 	</div>
-	<div class="container-fluid">
-		<div class="row">
-			<div class="col-md-3">
-				
-			</div>
-			<div class="col-md-3">2222</div>
-			<div class="col-md-3">3333</div>
-			<div class="col-md-3">4444</div>
-		</div>
-	</div>
-	<label class="btn btn-primary bk-uploader" for="uploadImg">
-		<span class="glyphicon glyphicon-cloud-upload"></span>
-	</label>
+	<ul class="book-imgUl" bindonce>
+		<li ng-repeat="uimg in imgList" img-control img-key="{{uimg.key}}">
+			<img bo-src="uimg.url" alt="">
+			<a class="book-opration" ng-if="showOprate" ng-click="deleteImage()">
+				<span class="glyphicon glyphicon-trash"></span>
+			</a>
+		</li>
+		<li ng-if="unloading">
+			<circle></circle>
+		</li>
+		<li style="border:1px dotted #40B5DB">
+			<label class="bk-uploader" for="uploadImg">
+				<span class="glyphicon glyphicon-plus" style="top:23px;"></span>
+			</label>
+		</li>
+	</ul>
 	<input type="file" class="hide" id="uploadImg" up-loader="myFile"/>
 </div>

@@ -8,6 +8,9 @@ myApp.service("macwin",function(app,$http,$templateCache,$compile){
 	var canvas = document.getElementById(app.canvasName);
 	var ctx = canvas.getContext("2d");
 	var maxIndex = 1;
+	var startPosition = {},movePosition = {},doc = $(document);
+	var dragMinWidth = 500;
+	var dragMinHeight = 225;
 	/**
 	* 绘制形状
 	* @param s1 {Number} 起点一
@@ -166,7 +169,58 @@ myApp.service("macwin",function(app,$http,$templateCache,$compile){
         return e;
 	}
 
-	var startPosition = {},movePosition = {},doc = $(document);
+	/*-------------------------- +
+	  改变大小函数
+	 +-------------------------- */
+	function resize(oParent, handle, isLeft, isTop, lockX, lockY)
+	{
+		var disX,disY,iParentTop,iParentLeft,iParentWidth,iParentHeight;
+
+		var _resize = function(event){
+			var event = event || window.event;
+				
+			var iL = event.clientX - disX;
+			var iT = event.clientY - disY;
+			var maxW = document.documentElement.clientWidth - oParent[0].offsetLeft - 2;
+			var maxH = document.documentElement.clientHeight - oParent[0].offsetTop - 2;			
+			var iW = isLeft ? iParentWidth - iL : handle[0].offsetWidth + iL;
+			var iH = isTop ? iParentHeight - iT : handle[0].offsetHeight + iT;
+				
+			isLeft && (oParent[0].style.left = iParentLeft + iL + "px");
+			isTop && (oParent[0].style.top = iParentTop + iT + "px");
+				
+			iW < dragMinWidth && (iW = dragMinWidth);
+			iW > maxW && (iW = maxW);
+			lockX || (oParent[0].style.width = iW + "px");
+				
+			iH < dragMinHeight && (iH = dragMinHeight);
+			iH > maxH && (iH = maxH);
+			lockY || (oParent[0].style.height = iH + "px");
+				
+			if((isLeft && iW == dragMinWidth) || (isTop && iH == dragMinHeight)) doc.unbind("mousemove",_resize);
+				
+			return false;
+		},
+		_resizeEnd = function(e){
+			doc.unbind("mousemove",_resize).unbind("mouseup",_resizeEnd);
+
+			return false;
+		};
+
+		handle.bind("mousedown",function(event){
+			var event = event || window.event;
+			disX = event.clientX - handle[0].offsetLeft;
+			disY = event.clientY - handle[0].offsetTop;	
+			iParentTop = oParent[0].offsetTop;
+			iParentLeft = oParent[0].offsetLeft;
+			iParentWidth = oParent[0].offsetWidth;
+			iParentHeight = oParent[0].offsetHeight;
+			
+			doc.bind("mousemove",_resize).bind("mouseup",_resizeEnd);
+			
+			return false;
+		});
+	};
 
 	function bindEvent(obj,picker){
 		var _down = function(e){
@@ -246,6 +300,26 @@ myApp.service("macwin",function(app,$http,$templateCache,$compile){
             this.releaseCapture && this.releaseCapture();
         });
 
+        var oL = obj.find(".resizeL");
+		var oT = obj.find(".resizeT");
+		var oR = obj.find(".resizeR");
+		var oB = obj.find(".resizeB");
+		var oLT = obj.find(".resizeLT");
+		var oTR = obj.find(".resizeTR");
+		var oBR = obj.find(".resizeBR");
+		var oLB = obj.find(".resizeLB");
+
+        //四角
+		resize(obj, oLT, true, true, false, false);
+		resize(obj, oTR, false, true, false, false);
+		resize(obj, oBR, false, false, false, false);
+		resize(obj, oLB, true, false, false, false);
+		//四边
+		resize(obj, oL, true, false, false, true);
+		resize(obj, oT, false, true, true, false);
+		resize(obj, oR, false, false, false, true);
+		resize(obj, oB, false, false, true, false);
+
         obj.mousedown(function(){
         	setFrontest(obj);
         });
@@ -257,22 +331,23 @@ myApp.service("macwin",function(app,$http,$templateCache,$compile){
 		});
 	}
 
-	var defaults = {
-		templateUrl:"<div>新窗口</div>",
-		size:"lg",
-		macId:"mac_"+new Date().getTime(),
-		title:"新窗口",
-		picker:"",
-		scope:"",
-	}
-
 	this.open = function(options){
+		var defaults = {
+			templateUrl:"<div>新窗口</div>",
+			size:"lg",
+			macId:"mac_"+new Date().getTime(),
+			title:"新窗口",
+			picker:"",
+			scope:"",
+		}
+		
 		angular.extend(defaults,options);
 
 		if(!$("#"+defaults.macId).length){
 			var winDiv = "<div class='macWindow' id='"+defaults.macId+"' style='visibility:hidden' isLock='false'>";
 			winDiv+= '<div class="t"><div class="h-icon icon-r"><span class="glyphicon glyphicon-remove h-opIcon"></span></div><div class="h-icon icon-y"><span class="glyphicon glyphicon-minus h-opIcon"></span></div><div class="h-icon icon-b"><span class="glyphicon glyphicon-unchecked h-opIcon"></span></div>';
 			winDiv+= '<div class="h-title">'+defaults.title+'</div></div>';
+			winDiv+= '<div class="resize resizeL"></div><div class="resize resizeT"></div><div class="resize resizeR"></div><div class="resize resizeB"></div><div class="resize resizeLT"></div><div class="resize resizeTR"></div><div class="resize resizeBR"></div><div class="resize resizeLB"></div>';
 			winDiv+= '<div class="c">';
 
 			$http.get(defaults.templateUrl,{ cache: $templateCache, headers: { Accept: 'text/html' }})
@@ -282,7 +357,7 @@ myApp.service("macwin",function(app,$http,$templateCache,$compile){
 
 				var el = $compile(winDiv)(defaults.scope);
 
-				$("body").append(el);
+				$(".main").append(el);
 
 				setFrontest($(winDiv));
 

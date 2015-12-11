@@ -1,8 +1,6 @@
-[2015-11-19 18:12:34.830] [WARN] normal - GET /
-[2015-11-19 18:14:37.044] [WARN] normal - GET /
-[2015-11-19 18:20:17.517] [WARN] normal - GET /
-[2015-11-19 18:26:35.508] [WARN] normal - GET /
-[2015-11-20 11:24:06.784] [INFO] normal - GET /
-[2015-11-20 11:24:24.196] [INFO] normal - POST /api/files/uploadImg
-[2015-11-20 11:26:28.759] [INFO] normal - POST /api/files/uploadImg
-[2015-11-20 12:14:59.565] [INFO] normal - POST /api/files/uploadImg
+[2015-12-11 15:36:53.048] [WARN] normal - GET /
+[2015-12-11 15:36:54.682] [INFO] normal - POST /api/files/getQiuniuFiles
+[2015-12-11 15:36:55.764] [INFO] normal - POST /api/files/deleteQiniuFiles
+[2015-12-11 15:36:57.664] [INFO] normal - GET /api/files/getQiniuToken?bucketname=zhugemaolu
+[2015-12-11 15:37:00.815] [INFO] normal - GET /api/files/getImageUrl?key=%2F1449819417655%2FQQ%E5%9B%BE%E7%89%8720150421130853.gif
+[2015-12-11 15:37:06.301] [INFO] normal - POST /api/files/deleteQiniuFiles

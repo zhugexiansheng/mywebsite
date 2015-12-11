@@ -53,7 +53,8 @@ gulp.task("js-lib",function(){
 		"static/bower_components/angular-animate/angular-animate.js",
 		"static/bower_components/angular-cookies/angular-cookies.js",
 		"static/bower_components/angular-ui-router/release/angular-ui-router.js",
-		"static/bower_components/angular-resource/angular-resource.js"
+		"static/bower_components/angular-resource/angular-resource.js",
+		"static/bower_components/angular-bindonce/bindonce.js"
 	]).pipe(concat("lib.js"))
 	.pipe(gulp.dest("static/dist/js/"));
 });

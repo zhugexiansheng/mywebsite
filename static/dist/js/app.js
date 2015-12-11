@@ -1,16 +1,18 @@
 /*
 * angularjs的主要入口
 */
-var myApp = angular.module("myApp",["ui.router","ngCookies","ngAnimate",'ngResource',"genTemplates"]);
+var myApp = angular.module("myApp",["ui.router","ngCookies","ngAnimate",'ngResource',"genTemplates",'pasvaz.bindonce']);
 
 myApp.config(['$httpProvider','app',function($httpProvider,app){
 	//统一的请求拦截处理，包括本地的模板ajax请求
 	$httpProvider.interceptors.push("securityInterceptor");
-}]).run(['app',"$rootScope",function(app,$rootScope){
+}]).run(['app',"$rootScope","$filter",function(app,$rootScope,$filter){
 	var global = $rootScope.global = {
 		isLogin : false,
 		info : {}
 	};
+
+	app.filter = $filter;
 }]);
 /*
 *通过constent定义一个常量服务
@@ -39,6 +41,27 @@ myApp
 
 		$urlRouterProvider.otherwise('/login');
 	}]);
+/*
+*公共的数据格式化方法，包括对数据的处理
+*@auth xiaoming
+*/
+
+//删掉数组指定下标的元素
+myApp.filter("curArry",function(){
+	return function(arr,index){
+		if (angular.isArray(arr)) {
+			if (!isNaN(index)&&index<=arr.length) {
+				for(var i=index;i<arr.length;i++){
+					arr[i]=arr[i+1];
+				}
+
+				arr.length--;
+
+				return arr;
+			};
+		};
+	}
+});
 /*公共服务*/
 myApp.factory("restAPI",["$resource",function($resource){
 	var actions = {
@@ -53,7 +76,11 @@ myApp.factory("restAPI",["$resource",function($resource){
 	return {
 		unameCheck : $resource("/api/user/unameCheck",{},actions),
 		userLogin : $resource("/api/user/userLogin",{},actions),
-		uploadImg : $resource("/api/files/uploadImg",{},actions)
+		uploadImg : $resource("/api/files/uploadImg",{},actions),
+		getQiniuToken : $resource("/api/files/getQiniuToken",{},actions),
+		getQiuniuFiles : $resource("/api/files/getQiuniuFiles",{},actions),
+		getImageUrl : $resource("/api/files/getImageUrl",{},actions),
+		deleteQiniuFiles : $resource("/api/files/deleteQiniuFiles",{},actions)
 	}
 }])
 .factory("cache",["$cacheFactory",function($cacheFactory){
@@ -76,6 +103,55 @@ myApp.provider('securityInterceptor',function(){
 	}
 });
 /*
+*弹出框组件
+*@params
+*@author xiaoming
+*/
+myApp.factory("alert",function(){
+	var defaults={
+		type:"load"
+	}
+
+	function createDiv(type){
+		var initDiv = "<div class='bd-alert'>";
+		
+		switch(type){
+			case "load":{
+
+			}
+			break;
+			case "comfirm":{
+
+			}
+			break;
+			default:{
+
+			}
+			break;
+		}
+
+		initDiv+="</div>";
+
+		return initDiv;
+	}
+
+	var alertDiv = function(){
+
+	}
+});
+/*
+*文件详情窗口
+*/
+myApp.service("fileDetail",function(){
+	var count = 0;
+	var content = "<div class='macWindow'><div";
+	this.open = function(){
+		if (count==0) {
+			
+		};
+	}
+});
+/*
 *macWindow公共服务,设置一个公共的类似mac系统的弹出窗口
 *@params size {string:"lg"大、"xg"中等、"sg"小} 大小
 *@params templateUrl {str} 里面视图模板的url地址
@@ -85,6 +161,9 @@ myApp.service("macwin",function(app,$http,$templateCache,$compile){
 	var canvas = document.getElementById(app.canvasName);
 	var ctx = canvas.getContext("2d");
 	var maxIndex = 1;
+	var startPosition = {},movePosition = {},doc = $(document);
+	var dragMinWidth = 500;
+	var dragMinHeight = 225;
 	/**
 	* 绘制形状
 	* @param s1 {Number} 起点一
@@ -243,7 +322,58 @@ myApp.service("macwin",function(app,$http,$templateCache,$compile){
         return e;
 	}
 
-	var startPosition = {},movePosition = {},doc = $(document);
+	/*-------------------------- +
+	  改变大小函数
+	 +-------------------------- */
+	function resize(oParent, handle, isLeft, isTop, lockX, lockY)
+	{
+		var disX,disY,iParentTop,iParentLeft,iParentWidth,iParentHeight;
+
+		var _resize = function(event){
+			var event = event || window.event;
+				
+			var iL = event.clientX - disX;
+			var iT = event.clientY - disY;
+			var maxW = document.documentElement.clientWidth - oParent[0].offsetLeft - 2;
+			var maxH = document.documentElement.clientHeight - oParent[0].offsetTop - 2;			
+			var iW = isLeft ? iParentWidth - iL : handle[0].offsetWidth + iL;
+			var iH = isTop ? iParentHeight - iT : handle[0].offsetHeight + iT;
+				
+			isLeft && (oParent[0].style.left = iParentLeft + iL + "px");
+			isTop && (oParent[0].style.top = iParentTop + iT + "px");
+				
+			iW < dragMinWidth && (iW = dragMinWidth);
+			iW > maxW && (iW = maxW);
+			lockX || (oParent[0].style.width = iW + "px");
+				
+			iH < dragMinHeight && (iH = dragMinHeight);
+			iH > maxH && (iH = maxH);
+			lockY || (oParent[0].style.height = iH + "px");
+				
+			if((isLeft && iW == dragMinWidth) || (isTop && iH == dragMinHeight)) doc.unbind("mousemove",_resize);
+				
+			return false;
+		},
+		_resizeEnd = function(e){
+			doc.unbind("mousemove",_resize).unbind("mouseup",_resizeEnd);
+
+			return false;
+		};
+
+		handle.bind("mousedown",function(event){
+			var event = event || window.event;
+			disX = event.clientX - handle[0].offsetLeft;
+			disY = event.clientY - handle[0].offsetTop;	
+			iParentTop = oParent[0].offsetTop;
+			iParentLeft = oParent[0].offsetLeft;
+			iParentWidth = oParent[0].offsetWidth;
+			iParentHeight = oParent[0].offsetHeight;
+			
+			doc.bind("mousemove",_resize).bind("mouseup",_resizeEnd);
+			
+			return false;
+		});
+	};
 
 	function bindEvent(obj,picker){
 		var _down = function(e){
@@ -323,6 +453,26 @@ myApp.service("macwin",function(app,$http,$templateCache,$compile){
             this.releaseCapture && this.releaseCapture();
         });
 
+        var oL = obj.find(".resizeL");
+		var oT = obj.find(".resizeT");
+		var oR = obj.find(".resizeR");
+		var oB = obj.find(".resizeB");
+		var oLT = obj.find(".resizeLT");
+		var oTR = obj.find(".resizeTR");
+		var oBR = obj.find(".resizeBR");
+		var oLB = obj.find(".resizeLB");
+
+        //四角
+		resize(obj, oLT, true, true, false, false);
+		resize(obj, oTR, false, true, false, false);
+		resize(obj, oBR, false, false, false, false);
+		resize(obj, oLB, true, false, false, false);
+		//四边
+		resize(obj, oL, true, false, false, true);
+		resize(obj, oT, false, true, true, false);
+		resize(obj, oR, false, false, false, true);
+		resize(obj, oB, false, false, true, false);
+
         obj.mousedown(function(){
         	setFrontest(obj);
         });
@@ -334,22 +484,23 @@ myApp.service("macwin",function(app,$http,$templateCache,$compile){
 		});
 	}
 
-	var defaults = {
-		templateUrl:"<div>新窗口</div>",
-		size:"lg",
-		macId:"mac_"+new Date().getTime(),
-		title:"新窗口",
-		picker:"",
-		scope:"",
-	}
-
 	this.open = function(options){
+		var defaults = {
+			templateUrl:"<div>新窗口</div>",
+			size:"lg",
+			macId:"mac_"+new Date().getTime(),
+			title:"新窗口",
+			picker:"",
+			scope:"",
+		}
+		
 		angular.extend(defaults,options);
 
 		if(!$("#"+defaults.macId).length){
 			var winDiv = "<div class='macWindow' id='"+defaults.macId+"' style='visibility:hidden' isLock='false'>";
 			winDiv+= '<div class="t"><div class="h-icon icon-r"><span class="glyphicon glyphicon-remove h-opIcon"></span></div><div class="h-icon icon-y"><span class="glyphicon glyphicon-minus h-opIcon"></span></div><div class="h-icon icon-b"><span class="glyphicon glyphicon-unchecked h-opIcon"></span></div>';
 			winDiv+= '<div class="h-title">'+defaults.title+'</div></div>';
+			winDiv+= '<div class="resize resizeL"></div><div class="resize resizeT"></div><div class="resize resizeR"></div><div class="resize resizeB"></div><div class="resize resizeLT"></div><div class="resize resizeTR"></div><div class="resize resizeBR"></div><div class="resize resizeLB"></div>';
 			winDiv+= '<div class="c">';
 
 			$http.get(defaults.templateUrl,{ cache: $templateCache, headers: { Accept: 'text/html' }})
@@ -359,7 +510,7 @@ myApp.service("macwin",function(app,$http,$templateCache,$compile){
 
 				var el = $compile(winDiv)(defaults.scope);
 
-				$("body").append(el);
+				$(".main").append(el);
 
 				setFrontest($(winDiv));
 
@@ -373,31 +524,7 @@ myApp.service("macwin",function(app,$http,$templateCache,$compile){
 	}
 })
 /*
-*图片操作的controller
-*/
-myApp.controller("imgpageCtr",['app','$scope',function(app,$scope){
-	
-}]);
-/*
-*文件上传组件
-*/
-myApp.directive("upLoader",["$parse","restAPI",function($parse,restAPI){
-	return {
-		link:function($scope, element, attrs){
-			element.bind("change",function(event){
-				var data = new FormData();
-				console.log(element[0].files[0]);
-				data.append("uploadFile",element[0].files[0]);
-
-				restAPI.uploadImg.post(data,function(res){
-					console.log(res);
-				});
-			});
-		}
-	}
-}]);
-/*
-*封装一下下面那个菜单栏的动作
+*封装一下下面那个菜单栏的动作,模拟出类似苹果的效果
 */
 myApp.directive("menuOver",function(){
 	return {
@@ -454,6 +581,192 @@ myApp.controller('indexCtrl',['app','$scope',"macwin",function(app,$scope,macwin
 		});
 	}
 }]);
+/*
+*图片操作的controller
+*/
+myApp.controller("imgpageCtr",['app','$scope',"restAPI",function(app,$scope,restAPI){
+	$scope.imgList = [];
+	$scope.unloading = false;
+	//获取图片列表
+	restAPI.getQiuniuFiles.post({bucketname:"zhugemaolu",limit:10},function(res){
+		$scope.imgList = res.list;
+	});
+
+	$scope.loadStart = function(key){
+		$scope.unloading = true;
+	}
+
+	$scope.loadProgress = function(key,per){
+		$scope.$broadcast("pie",per);
+	}
+
+	$scope.loadComplete = function(data){
+		restAPI.getImageUrl.get({key:data.key},function(res){
+			data.url = res.url;
+
+			$scope.unloading = false;
+			$scope.imgList.push(data);
+		});
+	}
+
+	$scope.deleteList = function(key){
+		angular.forEach($scope.imgList,function(item,index){
+			if (item.key==key) {
+				$scope.imgList = app.filter("curArry")($scope.imgList,index);
+			};
+		});
+	}
+}]);
+/*
+*文件上传组件
+*/
+myApp.directive("upLoader",["restAPI",function(restAPI){
+	return {
+		link:function($scope, element, attrs){
+			function createXhrHttpRequest(){
+				if (window.ActiveXObject) {
+					return new ActiveXObject("Microsoft.XMLHTTP");
+				}else{
+					return new XMLHttpRequest();
+				}
+			}
+
+			element.bind("change",function(event){
+				var data = new FormData();
+				data.append("file",element[0].files[0]);
+
+				var key = "";
+
+		        if(element[0].files[0].name){
+		            key = "/" + new Date().valueOf() + "/" + element[0].files[0].name;
+		        }
+
+		        data.append("key",key);
+
+		        $scope.loadStart(key);
+			
+			    restAPI.getQiniuToken.get({bucketname:"zhugemaolu"},function(resData){
+			    	var token = resData.token;
+
+			    	data.append("token",token);
+
+					var xmlHttp = createXhrHttpRequest();
+
+					xmlHttp.onreadystatechange = function(){
+						if (xmlHttp.readyState==4&&xmlHttp.status==200) {
+							//回调上层控制器的方法
+		                	$scope.loadComplete(JSON.parse(xmlHttp.response));
+						};
+					}
+
+					/*每0.5秒/1秒调用一次*/
+					xmlHttp.upload.onprogress = function(e){
+						var loaded = e.loaded;
+						var total = e.total;
+
+						var per = Math.round(100*loaded/total);
+
+						$scope.loadProgress(key,per);
+					}
+
+					xmlHttp.open('POST',"http://up.qiniu.com");
+					xmlHttp.send(data);
+
+			        /*$.ajax({
+		                url: "http://up.qiniu.com",
+		                type: 'POST',
+		                data: data,
+		                processData: false,
+		                contentType: false
+		            }).done(function(res2){
+		            	//回调上层控制器的方法
+		                $scope.loadComplete(res2);
+		            });*/
+			    });
+			});
+		}
+	}
+}]);
+
+//每个图片的操作指令
+myApp.directive("imgControl",["restAPI",function(restAPI){
+	return {
+		link:function(scope,element,attrs,ngModel){
+			scope.showOprate = false;
+			var key = attrs.imgKey;
+
+			$(element).hover(function(){
+				scope.$apply(function(){
+					scope.showOprate = true;
+				});
+			},function(){
+				scope.$apply(function(){
+					scope.showOprate = false;
+				});
+			});
+
+			scope.deleteImage = function(){
+				restAPI.deleteQiniuFiles.post({bucketname:"zhugemaolu",key:key},function(res){
+					scope.deleteList(res.key);
+				});
+			}
+		}
+	}
+}]);
+
+//圆形进度条css3实现，效果不好
+/*myApp.directive("circle",function(){
+	return {
+		template:'<div class="bd-circle"><div class="pie-left"></div><div class="pie-right"></div></div>',
+		replace:true,
+		restrice:"E",
+		link:function(scope,element,attrs,ngModel){
+			scope.$on("pie",function(e,msg){
+				if (msg<=50) {
+					$(element).find(".pie-right").css("transform","rotate("+msg*3.6+"deg)");
+				}else{
+					$(element).find(".pie-right").css("transform","rotate(180deg)");
+					$(element).find(".pie-left").css("transform","rotate("+(msg-50)*3.6+"deg)");
+				}
+			});
+		}
+	}
+});*/
+
+//canvas实现扇形进度条
+myApp.directive("circle",function(){
+	return {
+		template:"<canvas class='bd-circle'></canvas>",
+		replace:true,
+		restrice:"E",
+		link:function(scope,element,attrs,ngModel){
+			var id = "canvas_"+new Date().getTime();
+			$(element).attr("id",id);
+			var canvas = document.getElementById(id);
+			var ctx = canvas.getContext('2d');
+			// 位移到圆心，方便绘制
+			ctx.translate(45, 45);
+			ctx.fillStyle="#ccc";
+			ctx.font = "20px Courier New";
+			ctx.strokeStyle="black";
+
+			scope.$on("pie",function(e,msg){
+				ctx.clearRect(0,0,180,90);
+				// 开始一条新路径
+				ctx.beginPath();
+				// 移动到圆心
+				ctx.moveTo(0, 0);
+				// 绘制圆弧
+				ctx.arc(0, 0, 45, 0, 0.02*msg*Math.PI);
+				// 闭合路径
+				ctx.closePath();
+				ctx.fill();
+
+				ctx.strokeText(msg+"%",0,0);
+			})
+		}
+	}
+});
 /*远程判断用户名是否存在*/
 myApp.directive("validename",function(restAPI){
 	return{
@@ -503,7 +816,7 @@ myApp.controller('loginCtrl',['app','$scope','restAPI','$location',function(app,
 
 angular.module('genTemplates', []).run(['$templateCache', function($templateCache) {
 
-  $templateCache.put('imagePage.html', '<div class="book-imgCon" ng-controller="imgpageCtr"><div class="btn-group btn-group-xs"><button type="button" class="btn btn-default"><span class="glyphicon glyphicon-th-list"></span></button> <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-th"></span></button></div><div class="container-fluid"><div class="row"><div class="col-md-3"></div><div class="col-md-3">2222</div><div class="col-md-3">3333</div><div class="col-md-3">4444</div></div></div><label class="btn btn-primary bk-uploader" for="uploadImg"><span class="glyphicon glyphicon-cloud-upload"></span></label> <input type="file" class="hide" id="uploadImg" up-loader="myFile"></div>');
+  $templateCache.put('imagePage.html', '<div class="book-imgCon" ng-controller="imgpageCtr"><div class="btn-group btn-group-xs"><button type="button" class="btn btn-default"><span class="glyphicon glyphicon-th-list"></span></button> <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-th"></span></button></div><ul class="book-imgUl" bindonce><li ng-repeat="uimg in imgList" img-control img-key="{{uimg.key}}"><img bo-src="uimg.url" alt> <a class="book-opration" ng-if="showOprate" ng-click="deleteImage()"><span class="glyphicon glyphicon-trash"></span></a></li><li ng-if="unloading"><circle></circle></li><li style="border:1px dotted #40B5DB"><label class="bk-uploader" for="uploadImg"><span class="glyphicon glyphicon-plus" style="top:23px;"></span></label></li></ul><input type="file" class="hide" id="uploadImg" up-loader="myFile"></div>');
 
   $templateCache.put('index.html', '<div class="book-manu" menu-over img-length="7"><img src="dist/img/mac/Finder.png" title="Finder" width="64px" ng-click="testService2()" id="message" class="folded"> <img src="dist/img/mac/Appstore.png" title="Appstore" width="64px"> <img src="dist/img/mac/Mail.png" title="Mail" width="64px" ng-click="testService()" id="mail" class="folded"> <img src="dist/img/mac/safari.png" title="safari" width="64px"> <img src="dist/img/mac/FaceTime.png" title="FaceTime" width="64px"> <img src="dist/img/mac/AddressBook.png" title="AddressBook" width="64px"> <img src="dist/img/mac/iCalendar.png" title="iCalendar" width="64px"></div><canvas id="winCanvas"></canvas>');
 

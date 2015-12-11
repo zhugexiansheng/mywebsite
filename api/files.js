@@ -3,7 +3,15 @@
 */
 var fs = require("fs");
 var logger = require("../lib/logConfig").logger("normal");
+var qiniu = require("qiniu");
 
+qiniu.conf.ACCESS_KEY = 'i4aRUHiCM3Aaf-PNqM_q3qUzXn-D2CWg7ECvGNGA';
+qiniu.conf.SECRET_KEY = 'yIqKDvHxyGPkGSvHmPq_4IAADwGQUvQa9lwHzUY1';
+
+var qiniuDomain = "7xokhe.com1.z0.glb.clouddn.com";
+var client = new qiniu.rs.Client();
+
+//自己处理上传文件，上传到指定本地指定的文件夹
 function uploadImg(req,res){
 	var imgsays = [];
 	var num = 0;
@@ -52,25 +60,111 @@ function uploadImg(req,res){
 
 	req.on("end",function(){
 	    ws.end();
-	    console.log("保存"+filename+"成功");
-	    res.json({"msg":"保存成功","resultCode":"1000"});
+	    logger.info("保存"+filename+"成功");
+	    res.json({"msg":"保存成功","resultCode":"0000"});
 	});
+}
+
+//获取七牛的token
+function getQiniuToken(req,res){
+	var bucketname = req.param("bucketname");
+
+	var token = uptoken(bucketname);
+
+	res.json({"msg":"成功","resultCode":"0000","token":token});
+}
+
+//七牛上传凭证生成
+function uptoken(bucketname) {
+  var putPolicy = new qiniu.rs.PutPolicy(bucketname);
+  //putPolicy.callbackUrl = callbackUrl;
+  //putPolicy.callbackBody = callbackBody;
+  //putPolicy.returnUrl = returnUrl;
+  //putPolicy.returnBody = returnBody;
+  //putPolicy.asyncOps = asyncOps;
+  //putPolicy.expires = expires;
+
+  return putPolicy.token();
+}
+
+var marker = "";
+
+//获取七牛的文件列表
+function getQiuniuFiles(req,res){
+	var bucketname = req.body.bucketname;
+	var prefix = req.body.prefix || "";
+	var limit = req.body.limit || "";
+
+	qiniu.rsf.listPrefix(bucketname, prefix, marker, limit, function(err, ret) {
+		if (!err) {
+		   // process ret.marker & ret.items
+		  marker = ret.marker;
+		  for(var i=0;i<ret.items.length;i++){
+		   	ret.items[i].url = downloadUrl(qiniuDomain,ret.items[i].key);
+		  }
+
+		  res.json({"msg":"成功",resultCode:"0000",list:ret.items});
+		} else {
+		  logger.error("七牛获取文件失败"+err);
+		  res.json({"msg":"七牛获取文件失败",resultCode:"1000"});
+		}
+	});
+}
+
+//获取单个图片的下载路径
+function getImageUrl(req,res){
+	var key = req.param("key");
+
+	res.json({msg:"成功",resultCode:"0000",url:downloadUrl(qiniuDomain,key)});
+}
+
+//生成七牛私有文件下载路径,生成缩略图
+function downloadUrl(domain, key) {
+  var baseUrl = qiniu.rs.makeBaseUrl(domain, key);
+  // 生成fop_url
+  var iv = new qiniu.fop.ImageView();
+  iv.width = 100;
+  baseUrl = iv.makeRequest(baseUrl);
+
+  var policy = new qiniu.rs.GetPolicy();
+  return policy.makeRequest(baseUrl);
+}
+
+//删除七牛空间文件
+function deleteQiniuFiles(req,res){
+	var key = req.body.key;
+	var bucketname = req.body.bucketname;
+
+	client.remove(bucketname, key, function(err, ret) {
+	  if (!err) {
+	    res.json({msg:"文件删除成功",resultCode:"0000",key:key});
+	  } else {
+	    logger.error("文件删除失败："+err);
+	    res.json({msg:"文件删除失败",resultCode:"1002"});
+	  }
+	})
 }
 
 module.exports = {
 	GET:function(req,res){
 		var path = req.path;
 		path = path.split("/");
-		/*switch (path[3]){
-			case "unameCheck":checkUname(req,res)
+		switch (path[3]){
+			case "getQiniuToken":getQiniuToken(req,res)
 			break;
-		}*/
+			case "getImageUrl":getImageUrl(req,res)
+			break;
+		}
 	},
 	POST:function(req,res){
 		var path = req.path;
 		path = path.split("/");
 		switch(path[3]){
 			case "uploadImg":uploadImg(req,res)
+			break;
+			case "getQiuniuFiles":getQiuniuFiles(req,res)
+			break;
+			case "deleteQiniuFiles":deleteQiniuFiles(req,res)
 			break;
 		}
 	}

@@ -1,5 +1,5 @@
 /*
-*封装一下下面那个菜单栏的动作
+*封装一下下面那个菜单栏的动作,模拟出类似苹果的效果
 */
 myApp.directive("menuOver",function(){
 	return {

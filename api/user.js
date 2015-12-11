@@ -1,4 +1,5 @@
 var userDao = require("../dao/userDao");
+var logger = require("../lib/logConfig").logger("normal");
 
 function checkUname(req,res){
 	var name = req.param("name");
